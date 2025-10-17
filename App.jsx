@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from "react";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [city, setCity] = useState("");
+  const [data, setData] = useState(null);
+
+  const getWeather = async () => {
+    if (!city) {
+      alert("Please enter a city name!");
+      return;
+    }
+
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=YOUR_API_KEY&units=metric`
+    );
+    const info = await response.json();
+
+    if (info.cod === 200) {
+      setData({
+        temp: info.main.temp,
+        humidity: info.main.humidity,
+        condition: info.weather[0].main,
+      });
+    } else {
+      alert("City not found!");
+      setData(null);
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="container">
+      <h2>🌤️ React Weather App</h2>
+      <div className="input-box">
+        <input
+          type="text"
+          placeholder="Enter city name"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+        />
+        <button onClick={getWeather}>Get Weather</button>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+
+      {data && (
+        <div className="weather-card">
+          <h3>Weather in {city}</h3>
+          <p>🌡️ Temperature: {data.temp} °C</p>
+          <p>💧 Humidity: {data.humidity}%</p>
+          <p>☁️ Condition: {data.condition}</p>
+        </div>
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
